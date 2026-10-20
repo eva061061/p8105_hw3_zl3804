@@ -160,5 +160,21 @@ nhanes |>
   theme_minimal() +
   scale_fill_brewer(palette = "Set1")
 ```
-In "Less than HS" and "HS equivalent" groups, there are more young women than young men and more elder men than elder women , but among "More than HS" people, young men are much more than young women. Also, there are more elder 
-participants than younger ones in "Less than HS" and "HS equivalent", but for "More than HS" group, young people are more than elder people.
+The density plots show distinct age distributions across education levels. In the “Less than HS” group, both sexes are concentrated at older ages (roughly 50–80). In the “HS equivalent” group has a broader, males shows a secondary peak at younger ages and females are more concentrated in the 60–80 range. In contrast, the “More than HS” group is dominated by younger adults, especially females, who exhibit a sharp peak around ages 25–40; males in this category also have a younger modal age but display a longer right tail toward older ages. 
+
+```{r}
+hourly = nhanes |>
+  mutate(hour = (minute - 1) %/% 60) |>
+  group_by(education, sex, hour) |>
+  summarise(mean_mims = mean(mims, na.rm = TRUE), .groups = "drop")
+
+ggplot(hourly, aes(x = hour, y = mean_mims, color = sex)) +
+  geom_line(linewidth = 1) +
+  facet_wrap(~ education, ncol = 1) +
+  scale_x_continuous(breaks = seq(0, 23, 3)) +
+  labs(title = "24-hour activity patterns by education and sex",
+       x = "Hour of day", y = "Mean MIMS") +
+  theme_minimal() +
+  scale_color_brewer(palette = "Set1")
+```
+
