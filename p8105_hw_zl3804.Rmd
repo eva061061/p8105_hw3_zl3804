@@ -64,3 +64,34 @@ ggplot(jan_july, aes(x = year, y = avg_tmax, group = id)) +
 ```
 
 January temperatures show more year-to-year fluctuation and a slight upward trend at some stations. July temperatures are higher and more stable. A few stations appear as outliers, one station with unusually low value around 1987 July and one statioj with very lower tmax around 1982 Jan in particular.
+
+```{r}
+
+ggplot(ny_clean |> 
+         filter(!is.na(tmax_c), 
+                !is.na(tmin_c)), 
+       aes(x = tmin_c, y = tmax_c)) +
+  geom_hex(bins = 80) +
+  scale_fill_viridis_c(trans = "log10") +
+  geom_abline(slope = 1, intercept = 0, 
+              linetype = "dashed", 
+              color = "red") +
+  labs(title = "Tmax vs Tmin (all observations)",
+       x = "Tmin (°C)", 
+       y = "Tmax (°C)") +
+  theme_minimal()
+
+ny_clean |>
+  filter(snow_mm > 0, 
+         snow_mm < 100) |>
+  ggplot(aes(x = factor(year), y = snow_mm)) +
+  geom_boxplot(outlier.alpha = 0.2, 
+               fill = "lightblue") +
+  labs(title = "Distribution of positive snowfall (<100 mm) by year",
+       x = "Year", y = "Snowfall (mm)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7))
+```
+tmax and tmin are strongly positively associated. The snowfall distribution shows that most non-zero snowfalls are modest; extreme values are rare and the pattern is fairly consistent across years, with some years having heavier tails, for example, snowfall data in 2006 has heavy upper tail.
+
+
