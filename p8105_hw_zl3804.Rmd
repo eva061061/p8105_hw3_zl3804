@@ -252,3 +252,21 @@ ggplot(med_dur, aes(x = weekdays, y = med_duration, color = factor(year), group 
 Median ride duration is consistently longer in July than in January for both years, reflecting greater recreational use during warmer weather.
 
 Comparing years, median durations were longer in 2020 than in 2024 across almost all day-of-week and month combinations. The gap is particularly noticeable in July, where 2020 weekend rides reached about 16–17 minutes while 2024 weekend rides remained around 11 minutes. 
+
+```{r}
+
+citi |>
+  filter(year == 2024) |>
+  ggplot(aes(x = factor(month, levels = c(1, 7), labels = c("Jan", "Jul")), 
+             y = duration, 
+             fill = interaction(member_casual, rideable_type))) +
+  geom_boxplot(outlier.alpha = 0.15) +
+  scale_y_log10() +
+  labs(title = "Ride duration distributions (2024)",
+       subtitle = "by month, membership status and bike type",
+       x = "Month", y = "Duration (minutes, log scale)",
+       fill = "Member × Bike type") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+In both January and July 2024, casual riders take longer rides than members, regardless of bike type. Classic bikes show slightly higher median durations than electric bikes within each membership group. Durations are modestly longer in July than in January across all categories, and the distributions remain right-skewed with many short rides and a long upper tail of outliers.
