@@ -1,0 +1,14 @@
+---
+title: "p8105_hw3_zl3804"
+author: "Zhuoxuan Li (Eva)"
+date: "2026-10-20"
+output: github_document
+---
+# setup
+
+```{r}
+library(tidyverse)
+library(p8105.datasets)
+data("ny_noaa")
+```
+
