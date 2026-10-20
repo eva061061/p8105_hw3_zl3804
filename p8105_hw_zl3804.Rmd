@@ -9,6 +9,37 @@ output: github_document
 ```{r}
 library(tidyverse)
 library(p8105.datasets)
-data("ny_noaa")
+
 ```
+
+# Problem 1
+
+ny_noaa with `r ncol(ny_noaa)`variables and `r nrow(ny_noaa)` obervations includes daily observation data in different weather stations in New York over 1981–2010 ,such as weather station id，Precipitation (tenths of mm)，date，snowfall,snow depth,maximum temperature and minimum temperature.
+
+The data size is very large and many missing data exist, especially among tmax and tmin.
+
+```{r}
+data("ny_noaa")
+ny <- ny_noaa
+
+ny_clean = ny |>
+  mutate(
+    date = as.Date(date),
+    year = year(date),
+    month = month(date),
+    day = day(date),
+    prcp_mm = as.numeric(prcp)/ 10,         
+    tmax_c = as.numeric(tmax) / 10,          
+    tmin_c = as.numeric(tmin) / 10,           
+    snow_mm = snow,              
+    snwd_mm = snwd
+  ) |>
+  select(id, date, year, month, day, prcp_mm, snow_mm, snwd_mm, tmax_c, tmin_c)
+
+
+snow_common = ny_clean |>
+  count(snow_mm, sort = TRUE) |>
+  head(10)
+```
+The most common snowfall values are 0 (no snow) and 25mm, 13mm, 51mm, etc. Zero is by far the most frequent because most days have no snowfall.
 
