@@ -43,3 +43,24 @@ snow_common = ny_clean |>
 ```
 The most common snowfall values are 0 (no snow) and 25mm, 13mm, 51mm, etc. Zero is by far the most frequent because most days have no snowfall.
 
+```{r}
+jan_july <- ny_clean |>
+  filter(month == 1 | month == 7, !is.na(tmax_c)) |>
+  group_by(id, month, year) |>
+  summarise(avg_tmax = mean(tmax_c, na.rm = TRUE), .groups = "drop") |>
+  mutate(month_lab = factor(month, levels = c(1, 7), labels = c("January", "July")))
+
+ggplot(jan_july, aes(x = year, y = avg_tmax, group = id)) +
+  geom_line(alpha = 0.3, color = "steelblue") +
+  geom_smooth(aes(group = 1), se = FALSE, color = "darkred", linewidth = 1) +
+  facet_wrap(~ month_lab) +
+  labs(
+    title = "Average Maximum Temperature by Station",
+    subtitle = "January vs July, 1981–2010",
+    x = "Year", y = "Average Tmax (°C)"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(strip.text = element_text(face = "bold"))
+```
+
+January temperatures show more year-to-year fluctuation and a slight upward trend at some stations. July temperatures are higher and more stable. A few stations appear as outliers, one station with unusually low value around 1987 July and one statioj with very lower tmax around 1982 Jan in particular.
