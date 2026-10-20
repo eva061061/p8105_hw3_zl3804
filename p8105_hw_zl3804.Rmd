@@ -94,4 +94,47 @@ ny_clean |>
 ```
 tmax and tmin are strongly positively associated. The snowfall distribution shows that most non-zero snowfalls are modest; extreme values are rare and the pattern is fairly consistent across years, with some years having heavier tails, for example, snowfall data in 2006 has heavy upper tail.
 
+# Problem 2
+
+```{r}
+
+covar = read_csv(
+  "data/nhanes_covar.csv",
+  skip = 4,
+  na = c(".", "", "NA"),
+  show_col_types = FALSE
+) |>
+  janitor::clean_names()
+
+accel = read_csv(
+  "data/nhanes_accel.csv",
+  na = c(".", "", "NA"),
+  show_col_types = FALSE
+) |>
+  janitor::clean_names()
+
+
+covar_clean = covar |>
+  mutate(
+    sex = factor(sex, levels = c(1, 2), labels = c("Male", "Female")),
+    education = factor(education,
+                       levels = c(1, 2, 3),
+                       labels = c("Less than HS", "HS equivalent", "More than HS"),
+                       ordered = TRUE)
+  ) |>
+  filter(age >= 21, !is.na(sex), !is.na(education), !is.na(age))
+
+accel_long = accel |>
+  pivot_longer(
+    cols = starts_with("min"),
+    names_to = "minute",
+    values_to = "mims",
+    names_prefix = "min"
+  ) |>
+  mutate(minute = as.integer(minute))
+
+nhanes = accel_long |>
+  inner_join(covar_clean, by = "seqn")
+```
+
 
