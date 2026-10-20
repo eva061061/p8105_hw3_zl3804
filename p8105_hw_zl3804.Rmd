@@ -181,3 +181,74 @@ ggplot(hourly, aes(x = hour, y = mean_mims, color = sex)) +
 All three education groups show a similar pattern: mean MIMS is lowest during the overnight hours (roughly 0–5), rises sharply in the early morning, remains elevated throughout the daytime (approximately 9–18), and then declines in the evening.
 
 Sex differences are modest but consistent. In the “Less than HS” group, males and females have very similar activity profiles, with males slightly higher overnight. In the “HS equivalent” and especially the “More than HS” groups, females maintain higher mean activity than males during most of the daytime hours. The highest education group also shows the most sustained daytime activity and the largest sex gap during the day.
+
+
+# Problem 3
+
+```{r}
+citi_2020_01 <- read_csv("data/Jan 2020 Citi.csv", na = c(".", "", "NA"), show_col_types = FALSE)|>
+  janitor::clean_names() |>
+  mutate(year = 2020, month = 1)
+
+citi_2020_07 <- read_csv("data/July 2020 Citi.csv", na = c(".", "", "NA"), show_col_types = FALSE) |>
+  janitor::clean_names() |>
+  mutate(year = 2020, month = 7)
+
+citi_2024_01 <- read_csv("data/Jan 2024 Citi.csv", na = c(".", "", "NA"), show_col_types = FALSE) |>
+  janitor::clean_names() |>
+  mutate(year = 2024, month = 1)
+
+citi_2024_07 <- read_csv("data/July 2024 Citi.csv", show_col_types = FALSE) |>
+  janitor::clean_names() |>
+  mutate(year = 2024, month = 7)
+
+citi <- bind_rows(citi_2020_01, citi_2020_07, citi_2024_01, citi_2024_07) |>
+  mutate(
+    member_casual = factor(member_casual),
+    rideable_type = factor(rideable_type),
+    weekdays = factor(weekdays, 
+                      levels = c("Monday", "Tuesday", "Wednesday", "Thursday",
+                                 "Friday", "Saturday", "Sunday"))
+  )
+```
+The resulting dataset contains rides from four months (1% sample of rides < 4 hours). Key variables include start/end times, stations, bike type (classic/electric), and membership status. After cleaning we retain positive durations under 4 hours.
+```{r}
+
+rides_tab <- citi |>
+  count(year, month, member_casual) |>
+  pivot_wider(names_from = member_casual, values_from = n)
+
+knitr::kable(rides_tab, caption = "Total rides by year, month and membership")
+
+citi |>
+  filter(year == 2024, month == 7) |>
+  count(start_station_name, sort = TRUE) |>
+  head(5) |>
+  knitr::kable(caption = "Top 5 starting stations, July 2024")
+```
+Top 5 starting stations, July 2024
+The five most popular starting stations in July 2024 are all located in Pier 61 at Chelsea Piers leads with 163 rides, followed closely by University Pl & E 14 St (155), W 21 St & 6 Ave (152), West St & Chambers St (150), and W 31 St & 7 Ave (146). 
+
+
+Member rides far outnumber casual rides in every period. Ridership is substantially higher in July than in January for both years, consistent with seasonal weather patterns. Comparing 2020 to 2024, overall volume has increased markedly: January member rides rose from about 11.4k to 16.8k, while July member rides more than doubled.
+
+```{r}
+
+med_dur = citi |>
+  group_by(year, month, weekdays) |>
+  summarise(med_duration = median(duration, na.rm = TRUE), .groups = "drop") |>
+  mutate(month_lab = factor(month, levels = c(1, 7), labels = c("January", "July")))
+
+ggplot(med_dur, aes(x = weekdays, y = med_duration, color = factor(year), group = year)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  facet_wrap(~ month_lab) +
+  labs(title = "Median ride duration by day of week, month and year",
+       x = "Day of week", y = "Median duration (minutes)",
+       color = "Year") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+Median ride duration is consistently longer in July than in January for both years, reflecting greater recreational use during warmer weather.
+
+Comparing years, median durations were longer in 2020 than in 2024 across almost all day-of-week and month combinations. The gap is particularly noticeable in July, where 2020 weekend rides reached about 16–17 minutes while 2024 weekend rides remained around 11 minutes. 
